@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>羽毛球排行榜</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --dark-color: #333;
+            --light-color: #f8f9fa;
+            --border-color: #ddd;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark-color);
+            /* 背景图片设置 */
+            background-image: url('https://images.unsplash.com/photo-1551855375-5dc0e2229cee?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            /* 添加半透明遮罩提高文字可读性 */
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.85);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        
+        tr:nth-child(even) {
+            background-color: rgba(248, 249, 250, 0.7);
+        }
+        
+        tr:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .rank {
+            text-align: center;
+            font-weight: bold;
+            width: 60px;
+            color: var(--primary-color);
+        }
+        
+        .rank-1 {
+            background-color: var(--gold);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            line-height: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .rank-2 {
+            background-color: var(--silver);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            line-height: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .rank-3 {
+            background-color: var(--bronze);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            line-height: 30px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .score {
+            text-align: right;
+            color: var(--secondary-color);
+            font-weight: 500;
+            width: 100px;
+        }
+        
+        .edit-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .edit-btn:hover {
+            background-color: #0b7dda;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .score-input {
+            width: 80px;
+            padding: 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            text-align: right;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .save-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .save-btn:hover {
+            background-color: #3e8e41;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 5px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cancel-btn:hover {
+            background-color: #d32f2f;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .actions {
+            width: 150px;
+            text-align: right;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .status-message {
+            text-align: center;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .success {
+            background-color: rgba(223, 240, 216, 0.9);
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        
+        .error {
+            background-color: rgba(242, 222, 222, 0.9);
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        
+        .medal-icon {
+            margin-right: 5px;
+        }
+        
+        /* 按钮组样式 */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button-group button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        .save-btn {
+            background-color: #5bc0de;
+            color: white;
+        }
+        
+        .load-btn {
+            background-color: #5cb85c;
+            color: white;
+        }
+        
+        .add-btn {
+            background-color: #f0ad4e;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏸 羽毛球排行榜 🏸</h1>
+        
+        <div id="status-message" class="status-message"></div>
+        
+        <div class="table-container">
+            <table id="ranking-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>姓名</th>
+                        <th>分数</th>
+                        <th class="actions">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- 表格内容将由JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            最后更新时间: <span id="update-time"></span>
+            <div class="button-group">
+                <button onclick="saveToLocalStorage()" class="save-btn">手动保存</button>
+                <button onclick="loadFromLocalStorage()" class="load-btn">加载存档</button>
+                <button onclick="addNewPlayer()" class="add-btn">添加选手</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化数据
+        let players = [
+            { id: 1, name: "LXH", score: 3000 },
+            { id: 2, name: "TYK", score: 2000 },
+            { id: 3, name: "LJP", score: 1000 },
+            { id: 4, name: "Benson", score: 1000 },
+            { id: 5, name: "NHX", score: 1000 },
+            { id: 6, name: "LCZ", score: 0 }
+        ];
+        
+        let nextId = 7; // 用于新选手的ID
+        
+        // 显示状态消息
+        function showStatusMessage(message, isSuccess) {
+            const statusElement = document.getElementById('status-message');
+            statusElement.textContent = message;
+            statusElement.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+            statusElement.style.display = 'block';
+            
+            setTimeout(() => {
+                statusElement.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 显示当前时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('update-time').textContent = now.toLocaleString();
+        }
+        
+        // 根据分数排序玩家并分配排名
+        function sortAndRankPlayers() {
+            // 按分数降序排序
+            players.sort((a, b) => b.score - a.score);
+            
+            // 分配排名，处理相同分数的情况
+            let currentRank = 1;
+            for (let i = 0; i < players.length; i++) {
+                if (i > 0 && players[i].score === players[i - 1].score) {
+                    // 与前一名分数相同，则排名相同
+                    players[i].rank = players[i - 1].rank;
+                } else {
+                    players[i].rank = currentRank;
+                }
+                currentRank++;
+            }
+        }
+        
+        // 渲染排行榜表格
+        function renderRankingTable() {
+            const tableBody = document.getElementById('table-body');
+            tableBody.innerHTML = '';
+            
+            players.forEach((player, index) => {
+                const row = document.createElement('tr');
+                
+                // 为前三名添加特殊样式
+                if (player.rank === 1) {
+                    row.style.backgroundColor = 'rgba(255, 215, 0, 0.15)';
+                } else if (player.rank === 2) {
+                    row.style.backgroundColor = 'rgba(192, 192, 192, 0.15)';
+                } else if (player.rank === 3) {
+                    row.style.backgroundColor = 'rgba(205, 127, 50, 0.15)';
+                }
+                
+                // 排名单元格
+                const rankCell = document.createElement('td');
+                rankCell.className = 'rank';
+                if (player.rank === 1) {
+                    rankCell.innerHTML = '<span class="rank-1">1</span>';
+                } else if (player.rank === 2) {
+                    rankCell.innerHTML = '<span class="rank-2">2</span>';
+                } else if (player.rank === 3) {
+                    rankCell.innerHTML = '<span class="rank-3">3</span>';
+                } else {
+                    rankCell.textContent = player.rank;
+                }
+                
+                // 姓名单元格
+                const nameCell = document.createElement('td');
+                nameCell.textContent = player.name;
+                
+                // 分数单元格
+                const scoreCell = document.createElement('td');
+                scoreCell.className = 'score';
+                scoreCell.id = `score-${player.id}`;
+                scoreCell.textContent = player.score;
+                
+                // 操作单元格
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'actions';
+                actionsCell.innerHTML = `
+                    <button class="edit-btn" onclick="editScore(${player.id})">编辑</button>
+                    <button class="cancel-btn" onclick="deletePlayer(${player.id})" style="margin-left: 5px;">删除</button>
+                `;
+                
+                // 组装行
+                row.appendChild(rankCell);
+                row.appendChild(nameCell);
+                row.appendChild(scoreCell);
+                row.appendChild(actionsCell);
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 编辑分数功能
+        function editScore(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+            
+            const scoreCell = document.getElementById(`score-${playerId}`);
+            
+            // 创建输入框和按钮
+            scoreCell.innerHTML = `
+                <input type="number" class="score-input" id="edit-input-${playerId}" value="${player.score}">
+                <button class="save-btn" onclick="saveScore(${playerId})">保存</button>
+                <button class="cancel-btn" onclick="cancelEdit(${playerId})">取消</button>
+            `;
+            
+            // 自动聚焦到输入框
+            document.getElementById(`edit-input-${playerId}`).focus();
+        }
+        
+        // 保存分数
+        function saveScore(playerId) {
+            const input = document.getElementById(`edit-input-${playerId}`);
+            const newScore = parseInt(input.value);
+            
+            if (!isNaN(newScore)) {
+                // 更新玩家分数
+                const playerIndex = players.findIndex(p => p.id === playerId);
+                if (playerIndex !== -1) {
+                    players[playerIndex].score = newScore;
+                }
+                
+                // 重新排序并渲染
+                sortAndRankPlayers();
+                renderRankingTable();
+                
+                updateTime(); // 更新修改时间
+                saveToLocalStorage(); // 自动保存到本地存储
+                showStatusMessage("分数已保存并自动排序!", true);
+            } else {
+                showStatusMessage("请输入有效的数字分数!", false);
+            }
+        }
+        
+        // 取消编辑
+        function cancelEdit(playerId) {
+            renderRankingTable();
+        }
+        
+        // 删除玩家
+        function deletePlayer(playerId) {
+            if (confirm("确定要删除这位选手吗？")) {
+                players = players.filter(p => p.id !== playerId);
+                sortAndRankPlayers();
+                renderRankingTable();
+                saveToLocalStorage();
+                showStatusMessage("选手已删除!", true);
+            }
+        }
+        
+        // 添加新选手
+        function addNewPlayer() {
+            const name = prompt("请输入新选手姓名:");
+            if (name && name.trim()) {
+                const newPlayer = {
+                    id: nextId++,
+                    name: name.trim(),
+                    score: 0
+                };
+                
+                players.push(newPlayer);
+                sortAndRankPlayers();
+                renderRankingTable();
+                saveToLocalStorage();
+                showStatusMessage(`选手 ${name} 已添加!`, true);
+            } else if (name !== null) {
+                showStatusMessage("请输入有效的姓名!", false);
+            }
+        }
+        
+        // 保存数据到本地存储
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem('badmintonRankingData', JSON.stringify(players));
+                localStorage.setItem('badmintonRankingNextId', nextId);
+                localStorage.setItem('badmintonRankingLastUpdate', new Date().toISOString());
+                showStatusMessage("数据已成功保存到本地存储!", true);
+            } catch (e) {
+                showStatusMessage("保存数据时出错: " + e.message, false);
+            }
+        }
+        
+        // 从本地存储加载数据
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('badmintonRankingData');
+                const savedNextId = localStorage.getItem('badmintonRankingNextId');
+                
+                if (savedData) {
+                    players = JSON.parse(savedData);
+                    if (savedNextId) {
+                        nextId = parseInt(savedNextId);
+                    }
+                    
+                    sortAndRankPlayers();
+                    renderRankingTable();
+                    
+                    const lastUpdate = localStorage.getItem('badmintonRankingLastUpdate');
+                    if (lastUpdate) {
+                        document.getElementById('update-time').textContent = new Date(lastUpdate).toLocaleString();
+                    }
+                    
+                    showStatusMessage("数据已从本地存储加载!", true);
+                } else {
+                    showStatusMessage("没有找到存档数据!", false);
+                }
+            } catch (e) {
+                showStatusMessage("加载数据时出错: " + e.message, false);
+            }
+        }
+        
+        // 初始化页面
+        function init() {
+            sortAndRankPlayers();
+            renderRankingTable();
+            updateTime();
+            
+            // 尝试从本地存储加载数据
+            loadFromLocalStorage();
+            
+            // 设置定时保存
+            setInterval(saveToLocalStorage, 300000); // 每5分钟自动保存一次
+        }
+        
+        // 页面加载时初始化
+        window.addEventListener('load', init);
+        
+        // 页面关闭或刷新前自动保存
+        window.addEventListener('beforeunload', () => {
+            saveToLocalStorage();
+        });
+    </script>
+</body>
+</html>
